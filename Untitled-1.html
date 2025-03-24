@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seznam Python programů</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        pre { background: #f4f4f4; padding: 10px; border-radius: 5px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>Moje Python programy</h1>
+    <ul id="file-list"></ul>
+    <pre id="code-viewer"></pre>
+
+    <script>
+        const fileList = document.getElementById("file-list");
+        const codeViewer = document.getElementById("code-viewer");
+
+        // Seznam Python souborů, které jsou nahrány na web
+        const files = ["program1.py", "program2.py"]; // Sem přidej další soubory
+
+        files.forEach(filename => {
+            const li = document.createElement("li");
+            li.textContent = filename;
+            li.style.cursor = "pointer";
+            li.onclick = async () => {
+                try {
+                    const response = await fetch(filename);
+                    if (!response.ok) throw new Error("Soubor nelze načíst");
+                    const text = await response.text();
+                    codeViewer.textContent = text;
+                } catch (error) {
+                    codeViewer.textContent = "Chyba při načítání souboru: " + error.message;
+                }
+            };
+            fileList.appendChild(li);
+        });
+    </script>
+</body>
+</html>

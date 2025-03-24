@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seznam Python programů</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f9f9f9;
+            color: #333;
+        }
+        h1 {
+            text-align: center;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        li {
+            background: #007BFF;
+            color: white;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 5px;
+            cursor: pointer;
+            text-align: center;
+        }
+        li:hover {
+            background: #0056b3;
+        }
+        pre {
+            background: #272822;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Moje Python programy</h1>
+        <ul id="file-list"></ul>
+        <pre id="code-viewer">Klikněte na soubor pro zobrazení kódu...</pre>
+    </div>
+
+    <script>
+        const fileList = document.getElementById("file-list");
+        const codeViewer = document.getElementById("code-viewer");
+
+        async function fetchFiles() {
+            try {
+                const response = await fetch("."); // Načte obsah aktuální složky (potřebuje zapnutý directory listing)
+                const text = await response.text();
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(text, "text/html");
+                const links = Array.from(doc.querySelectorAll("a"));
+                const pyFiles = links.map(a => a.href.split("/").pop()).filter(name => name.endsWith(".py"));
+                
+                pyFiles.forEach(filename => {
+                    const li = document.createElement("li");
+                    li.textContent = filename;
+                    li.onclick = async () => {
+                        try {
+                            const fileResponse = await fetch(filename);
+                            if (!fileResponse.ok) throw new Error("Soubor nelze načíst");
+                            const fileText = await fileResponse.text();
+                            codeViewer.textContent = fileText;
+                        } catch (error) {
+                            codeViewer.textContent = "Chyba při načítání souboru: " + error.message;
+                        }
+                    };
+                    fileList.appendChild(li);
+                });
+            } catch (error) {
+                fileList.innerHTML = "Chyba při načítání souborů: " + error.message;
+            }
+        }
+        
+        fetchFiles();
+    </script>
+</body>
+</html>
